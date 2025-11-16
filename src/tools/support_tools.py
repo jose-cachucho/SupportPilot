@@ -1,17 +1,13 @@
 """
-Custom Tools for SupportPilot ADK Agents
+Custom Tools for SupportPilot ADK Agents (ADK-Native)
 
-These tools follow the ADK tool specification format and provide:
-1. Clear descriptions for LLM understanding
-2. Type hints for parameter validation  
-3. Detailed docstrings explaining input/output formats
-
-The ADK framework uses these descriptions to help the LLM decide when 
-and how to call each tool.
+These tools use the ADK FunctionTool wrapper for seamless integration
+with the Agent class. The ADK automatically extracts descriptions from
+docstrings and handles parameter validation.
 """
 
 from typing import Dict, Any, List
-from google.genai import types
+from google.adk.tools import FunctionTool
 from src.core.database import get_database, get_knowledge_base
 
 
@@ -31,12 +27,12 @@ def search_knowledge_base(query: str) -> Dict[str, Any]:
     articles.
     
     Args:
-        query (str): The user's problem description. Should be a clear statement
-                     of the technical issue (e.g., "VPN won't connect" or 
-                     "forgot my password").
+        query: The user's problem description. Should be a clear statement
+               of the technical issue (e.g., "VPN won't connect" or 
+               "forgot my password").
     
     Returns:
-        Dict[str, Any]: Search result containing:
+        A dictionary containing:
             - found (bool): Whether a matching solution was found
             - solution (str|None): Step-by-step solution if found
             - article_id (str|None): KB article identifier (e.g., "kb-001")
@@ -44,17 +40,17 @@ def search_knowledge_base(query: str) -> Dict[str, Any]:
             - category (str|None): Problem category (e.g., "network", "authentication")
     
     Examples:
-        Input: "my vpn is not working"
-        Output: {
+        >>> search_knowledge_base("my vpn is not working")
+        {
             "found": True,
-            "solution": "1. Check your internet connection\n2. Restart VPN client...",
+            "solution": "1. Check your internet...",
             "article_id": "kb-001",
             "title": "VPN Connection Troubleshooting",
             "category": "network"
         }
         
-        Input: "how to use advanced quantum computing features"
-        Output: {
+        >>> search_knowledge_base("quantum computing")
+        {
             "found": False,
             "solution": None,
             "article_id": None,
@@ -116,55 +112,45 @@ def create_support_ticket(
     follow up with the user directly.
     
     Args:
-        user_id (str): Unique identifier for the user requesting support.
-                       Format: alphanumeric string (e.g., "user_123", "john.doe")
+        user_id: Unique identifier for the user requesting support.
+                 Format: alphanumeric string (e.g., "user_123", "john.doe")
         
-        description (str): Clear, detailed description of the problem.
-                          Should include:
-                          - What the user is trying to do
-                          - What went wrong
-                          - Any error messages
-                          - Steps already attempted (if any)
-                          Example: "User cannot connect to VPN. Error: 'Authentication failed'. 
-                                   Tried restarting router and VPN client as per KB-001."
+        description: Clear, detailed description of the problem.
+                     Should include:
+                     - What the user is trying to do
+                     - What went wrong
+                     - Any error messages
+                     - Steps already attempted (if any)
+                     Example: "User cannot connect to VPN. Error: 'Authentication failed'. 
+                              Tried restarting router and VPN client as per KB-001."
         
-        priority (str, optional): Ticket priority level. Must be one of:
-                                 - "Low": Minor issues, no work stoppage
-                                 - "Normal": Regular issues (default)
-                                 - "High": Critical issues blocking work
-                                 Default: "Normal"
+        priority: Ticket priority level. Must be one of:
+                  - "Low": Minor issues, no work stoppage
+                  - "Normal": Regular issues (default)
+                  - "High": Critical issues blocking work
+                  Default: "Normal"
         
-        trace_id (str, optional): Internal trace ID for observability.
-                                 Automatically set by the orchestrator.
+        trace_id: Internal trace ID for observability (automatically set by orchestrator)
     
     Returns:
-        Dict[str, Any]: Ticket creation result containing:
+        A dictionary containing:
             - success (bool): Whether ticket was created successfully
             - ticket_id (str): Formatted ticket identifier (e.g., "TICKET-1001")
             - message (str): User-friendly confirmation message
             - estimated_response (str): Expected response time
     
     Examples:
-        Input: 
-            user_id="alice_123"
-            description="Cannot access shared drive. Error 0x80070035"
-            priority="High"
-        
-        Output: {
+        >>> create_support_ticket(
+        ...     user_id="alice_123",
+        ...     description="Cannot access shared drive. Error 0x80070035",
+        ...     priority="High"
+        ... )
+        {
             "success": True,
             "ticket_id": "TICKET-1005",
-            "message": "Support ticket TICKET-1005 has been created. L2 support will contact you within 4 business hours.",
+            "message": "Support ticket TICKET-1005 has been created...",
             "estimated_response": "4 business hours"
         }
-    
-    Error Handling:
-        - If description is empty, returns success=False with error message
-        - If priority is invalid, defaults to "Normal"
-    
-    Side Effects:
-        - Inserts a new row in the tickets database
-        - Generates a unique ticket ID
-        - Records creation timestamp
     
     When to use:
         - After search_knowledge_base returns found=False
@@ -228,29 +214,25 @@ def get_ticket_status(user_id: str) -> Dict[str, Any]:
     human support.
     
     Args:
-        user_id (str): Unique identifier for the user.
-                       Must match the user_id used when creating tickets.
-                       Format: alphanumeric string (e.g., "user_123")
+        user_id: Unique identifier for the user.
+                 Must match the user_id used when creating tickets.
+                 Format: alphanumeric string (e.g., "user_123")
     
     Returns:
-        Dict[str, Any]: Query result containing:
+        A dictionary containing:
             - found (bool): Whether any tickets exist for this user
             - count (int): Total number of tickets found
             - tickets (List[Dict]): List of ticket details, each containing:
                 - ticket_id (str): Formatted ID (e.g., "TICKET-1001")
                 - description (str): Problem description
-                - status (str): Current status - one of:
-                    * "Open": Ticket created, awaiting assignment
-                    * "In Progress": Being worked on by L2 support
-                    * "Closed": Issue resolved
+                - status (str): Current status ("Open", "In Progress", or "Closed")
                 - priority (str): "Low", "Normal", or "High"
                 - created_at (str): Creation timestamp (ISO format)
                 - updated_at (str): Last update timestamp
     
     Examples:
-        Input: user_id="alice_123"
-        
-        Output (tickets found): {
+        >>> get_ticket_status(user_id="alice_123")
+        {
             "found": True,
             "count": 2,
             "tickets": [
@@ -262,18 +244,12 @@ def get_ticket_status(user_id: str) -> Dict[str, Any]:
                     "created_at": "2025-11-15 09:30:00",
                     "updated_at": "2025-11-15 10:15:00"
                 },
-                {
-                    "ticket_id": "TICKET-1003",
-                    "description": "VPN connection issues",
-                    "status": "Closed",
-                    "priority": "Normal",
-                    "created_at": "2025-11-14 14:20:00",
-                    "updated_at": "2025-11-15 08:00:00"
-                }
+                ...
             ]
         }
         
-        Output (no tickets): {
+        >>> get_ticket_status(user_id="new_user")
+        {
             "found": False,
             "count": 0,
             "tickets": []
@@ -283,16 +259,11 @@ def get_ticket_status(user_id: str) -> Dict[str, Any]:
         - User asks "what are my tickets?"
         - User asks "check my ticket status"
         - User asks "do I have any open tickets?"
-        - User references a specific ticket (e.g., "what's the status of ticket 1005?")
+        - User references a specific ticket ID
     
     When NOT to use:
         - When user is describing a NEW problem (use search_knowledge_base first)
         - When user wants to CREATE a ticket (use create_support_ticket)
-    
-    Notes:
-        - Returns tickets in reverse chronological order (newest first)
-        - Includes both open and closed tickets
-        - Does not include tickets from other users (privacy)
     """
     db = get_database()
     tickets = db.get_user_tickets(user_id)
@@ -305,89 +276,24 @@ def get_ticket_status(user_id: str) -> Dict[str, Any]:
 
 
 # ============================================================================
-# ADK Tool Declarations
+# ADK FunctionTool Wrappers
 # ============================================================================
 
-# These declarations tell the ADK framework about our tools
-# The framework uses these to generate the tool calling interface for the LLM
+# Wrap each function with FunctionTool for ADK Agent integration
+kb_search_tool = FunctionTool(func=search_knowledge_base)
+ticket_creation_tool = FunctionTool(func=create_support_ticket)
+ticket_query_tool = FunctionTool(func=get_ticket_status)
 
-TOOLS = [
-    types.Tool(
-        function_declarations=[
-            types.FunctionDeclaration(
-                name="search_knowledge_base",
-                description=(
-                    "Search the IT support knowledge base for solutions to common technical problems. "
-                    "Use this FIRST when a user reports an issue. Returns step-by-step solutions if found. "
-                    "If no solution is found, escalate to ticket creation."
-                ),
-                parameters=types.Schema(
-                    type=types.Type.OBJECT,
-                    properties={
-                        "query": types.Schema(
-                            type=types.Type.STRING,
-                            description="The user's problem description (e.g., 'VPN not connecting', 'password expired')"
-                        )
-                    },
-                    required=["query"]
-                )
-            ),
-            types.FunctionDeclaration(
-                name="create_support_ticket",
-                description=(
-                    "Create a support ticket to escalate the issue to L2 human support. "
-                    "Use this when: (1) KB search found no solution, (2) user explicitly requests a ticket, "
-                    "(3) user is dissatisfied with KB solution ('didn't work', 'still broken'). "
-                    "Always try search_knowledge_base FIRST unless user explicitly asks for a ticket."
-                ),
-                parameters=types.Schema(
-                    type=types.Type.OBJECT,
-                    properties={
-                        "user_id": types.Schema(
-                            type=types.Type.STRING,
-                            description="User identifier (e.g., 'user_123')"
-                        ),
-                        "description": types.Schema(
-                            type=types.Type.STRING,
-                            description="Detailed problem description including what user tried"
-                        ),
-                        "priority": types.Schema(
-                            type=types.Type.STRING,
-                            description="Priority level: 'Low', 'Normal', or 'High'. Default is 'Normal'",
-                            enum=["Low", "Normal", "High"]
-                        ),
-                        "trace_id": types.Schema(
-                            type=types.Type.STRING,
-                            description="Internal trace ID (automatically set by system)"
-                        )
-                    },
-                    required=["user_id", "description"]
-                )
-            ),
-            types.FunctionDeclaration(
-                name="get_ticket_status",
-                description=(
-                    "Retrieve all support tickets for a user. "
-                    "Use this when user asks about their tickets, ticket status, or references a specific ticket ID. "
-                    "Returns list of tickets with current status (Open/In Progress/Closed)."
-                ),
-                parameters=types.Schema(
-                    type=types.TYPE.OBJECT,
-                    properties={
-                        "user_id": types.Schema(
-                            type=types.Type.STRING,
-                            description="User identifier to query tickets for"
-                        )
-                    },
-                    required=["user_id"]
-                )
-            )
-        ]
-    )
+
+# Export tools list for easy import
+SUPPORT_TOOLS = [
+    kb_search_tool,
+    ticket_creation_tool,
+    ticket_query_tool
 ]
 
 
-# Tool execution router
+# Tool name mapping for manual execution (if needed)
 TOOL_FUNCTIONS = {
     "search_knowledge_base": search_knowledge_base,
     "create_support_ticket": create_support_ticket,
@@ -399,7 +305,8 @@ def execute_tool(tool_name: str, parameters: Dict[str, Any]) -> Any:
     """
     Execute a tool by name with given parameters.
     
-    This is called by the ADK agent framework when the LLM decides to use a tool.
+    This is a fallback for direct tool execution outside of the Agent framework.
+    Normally, the ADK Agent handles tool execution automatically.
     
     Args:
         tool_name: Name of the tool to execute
