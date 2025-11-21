@@ -1,4 +1,33 @@
-python-dotenv
-colorama
-termcolor
+# ============================================================================
+# SupportPilot - Python Dependencies
+# ============================================================================
+# 
+# Installation:
+#   pip install -r requirements.txt
+#
+# Recommended: Use a virtual environment (venv) for isolation
+#   python -m venv .venv
+#   source .venv/bin/activate  # Linux/Mac
+#   .venv\Scripts\activate     # Windows
+# ============================================================================
+
+# --- Core Framework ---
+# Google Agent Development Kit (ADK) - Multi-agent orchestration framework
 google-adk
+
+# --- Environment & Configuration ---
+# Load environment variables from .env file (for GOOGLE_API_KEY)
+python-dotenv
+
+# --- Terminal Output Styling ---
+# Colorama: Cross-platform colored terminal text (Windows/Linux/Mac)
+colorama
+
+# Termcolor: ANSI color formatting for terminal output
+termcolor
+
+# ============================================================================
+# Notes:
+# - Ensure GOOGLE_API_KEY is set in your .env file
+# - Python 3.9+ recommended for ADK compatibility
+# ============================================================================
