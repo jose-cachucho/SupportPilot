@@ -1,16 +1,4 @@
-# Google ADK (Agent Development Kit)
-google-genai>=0.3.0
-
-# Core dependencies
-google-generativeai>=0.8.3
-python-dotenv>=1.0.0
-
-# Database
-# sqlite3 is built-in
-
-# Utilities for data validation
-pydantic>=2.0.0
-
-# Development (optional)
-pytest>=7.4.0
-black>=23.0.0
+python-dotenv
+colorama
+termcolor
+google-adk

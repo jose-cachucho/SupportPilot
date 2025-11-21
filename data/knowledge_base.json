@@ -1,142 +1,67 @@
 [
-  {
-    "id": "kb-001",
-    "title": "VPN Connection Issues",
-    "keywords": ["vpn", "not connecting", "connection failed", "remote access", "network"],
-    "solution": "1. Check your internet connection is working\n2. Restart your router/modem\n3. Close and reopen the VPN client application\n4. Verify your VPN credentials are correct\n5. Try connecting to a different VPN server location\n6. If using corporate VPN, ensure you're not on the office network\n7. Temporarily disable firewall/antivirus and try again\n8. Contact your network administrator if issue persists",
-    "category": "network"
-  },
-  {
-    "id": "kb-002",
-    "title": "Password Reset - Self Service",
-    "keywords": ["password", "forgot password", "reset password", "can't login", "expired password", "locked account"],
-    "solution": "1. Go to https://password.company.com\n2. Click 'Forgot Password'\n3. Enter your company email address\n4. Check your email for the reset link (may take 2-3 minutes)\n5. Click the link and create a new password\n6. Password must be at least 12 characters with uppercase, lowercase, numbers, and symbols\n7. Your new password will be active within 5 minutes\n8. If you don't receive the email, check your spam folder",
-    "category": "authentication"
-  },
-  {
-    "id": "kb-003",
-    "title": "Email Not Syncing on Mobile",
-    "keywords": ["email", "mobile", "phone", "sync", "not receiving", "outlook", "iphone", "android"],
-    "solution": "1. Ensure you have internet connectivity (WiFi or mobile data)\n2. Open your email app settings\n3. Navigate to Accounts > Your Work Email\n4. Toggle 'Sync Email' OFF, wait 10 seconds, toggle ON\n5. Check if 'Background Data' is enabled for the email app\n6. Try manually refreshing by pulling down on the inbox\n7. Remove and re-add the email account if issue continues\n8. Ensure your phone OS is up to date",
-    "category": "email"
-  },
-  {
-    "id": "kb-004",
-    "title": "Printer Not Responding",
-    "keywords": ["printer", "not printing", "print queue", "stuck", "offline", "printer error"],
-    "solution": "1. Check if the printer is turned on and has paper\n2. Look for error lights or messages on the printer display\n3. Open 'Devices and Printers' on your computer\n4. Right-click the printer and select 'See what's printing'\n5. Cancel all pending print jobs (Document > Cancel All)\n6. Right-click the printer again and select 'Set as default printer'\n7. Try printing a test page\n8. Restart both computer and printer if issue persists\n9. Check printer cable connections (USB or network)",
-    "category": "hardware"
-  },
-  {
-    "id": "kb-005",
-    "title": "Shared Drive Access Issues",
-    "keywords": ["shared drive", "network drive", "can't access", "drive not available", "mapped drive", "file share"],
-    "solution": "1. Verify you're connected to the corporate network or VPN\n2. Open File Explorer and type \\\\fileserver in the address bar\n3. If prompted, enter your domain\\username and password\n4. Check if the drive letter is already mapped (This PC > Network Locations)\n5. To map a new drive: Right-click 'This PC' > Map Network Drive\n6. Enter the share path provided by IT (e.g., \\\\fileserver\\department)\n7. Check 'Reconnect at sign-in' to make it permanent\n8. Contact IT if you need permissions for a specific folder",
-    "category": "network"
-  },
-  {
-    "id": "kb-006",
-    "title": "Slow Computer Performance",
-    "keywords": ["slow", "computer slow", "performance", "lagging", "freezing", "hanging"],
-    "solution": "1. Close unnecessary programs and browser tabs\n2. Restart your computer (resolves many issues)\n3. Check Task Manager (Ctrl+Shift+Esc) for programs using high CPU/Memory\n4. Ensure Windows Updates are installed\n5. Run Disk Cleanup: Search 'Disk Cleanup' in Start menu\n6. Check available disk space (C: drive should have at least 20GB free)\n7. Disable startup programs: Task Manager > Startup tab\n8. Run antivirus scan to check for malware\n9. If issue persists, submit a ticket for hardware evaluation",
-    "category": "performance"
-  },
-  {
-    "id": "kb-007",
-    "title": "Cannot Install Software",
-    "keywords": ["install", "software", "application", "can't install", "permission denied", "admin rights"],
-    "solution": "1. Check if you have administrative privileges (required for most installations)\n2. Try right-clicking the installer and selecting 'Run as Administrator'\n3. Verify the software is on the approved applications list\n4. Check if the software is already installed (Control Panel > Programs)\n5. Ensure you have sufficient disk space (at least 5GB free recommended)\n6. Temporarily disable antivirus during installation\n7. Download a fresh copy of the installer if download may have been corrupted\n8. For company-approved software, use the Software Center if available\n9. Submit a ticket if you need admin rights or software approval",
-    "category": "software"
-  },
-  {
-    "id": "kb-008",
-    "title": "WiFi Connected But No Internet",
-    "keywords": ["wifi", "connected", "no internet", "limited connectivity", "yellow triangle", "can't browse"],
-    "solution": "1. Check if other devices on same WiFi have internet access\n2. Disconnect and reconnect to the WiFi network\n3. Restart your WiFi router (unplug for 30 seconds)\n4. Forget the network and reconnect: Settings > Network > WiFi > Forget Network\n5. Run Windows Network Troubleshooter: Settings > Network > Status > Troubleshoot\n6. Flush DNS: Open Command Prompt and type 'ipconfig /flushdns'\n7. Reset network settings: Settings > Network > Status > Network Reset\n8. Check if your IP address is valid (should not be 169.254.x.x)\n9. Try connecting via ethernet cable to isolate WiFi issue",
-    "category": "network"
-  },
-  {
-    "id": "kb-009",
-    "title": "Outlook Calendar Not Syncing",
-    "keywords": ["calendar", "outlook", "sync", "appointments", "meetings", "not showing"],
-    "solution": "1. Ensure Outlook is connected to the internet\n2. Click 'Send/Receive All Folders' button in Outlook\n3. Go to File > Account Settings > Account Settings\n4. Select your email account and click 'Repair'\n5. Check if calendar items are in the correct calendar folder\n6. Verify calendar permissions if it's a shared calendar\n7. Clear Outlook cache: File > Options > Advanced > Outlook Data File Settings\n8. Restart Outlook and wait 5-10 minutes for sync\n9. Check calendar on Outlook Web Access to see if items appear there",
-    "category": "email"
-  },
-  {
-    "id": "kb-010",
-    "title": "Zoom Audio or Video Not Working",
-    "keywords": ["zoom", "audio", "video", "microphone", "camera", "can't hear", "can't see"],
-    "solution": "1. Check if microphone/camera are physically connected\n2. In Zoom, click the arrow next to Mute and select correct microphone\n3. Click the arrow next to Stop Video and select correct camera\n4. Test audio: Click 'Test Speaker & Microphone' in Zoom settings\n5. Check if another application is using your camera/microphone\n6. Grant Zoom permission to access camera/mic: System Settings > Privacy\n7. Update Zoom to the latest version\n8. Restart your computer\n9. Try joining via browser if desktop app fails\n10. Check if there's a physical mute button on your headset",
-    "category": "communication"
-  },
-  {
-    "id": "kb-011",
-    "title": "Forgot Multi-Factor Authentication Device",
-    "keywords": ["mfa", "2fa", "authenticator", "two factor", "lost phone", "can't login", "verification code"],
-    "solution": "1. Use backup codes if you saved them during MFA setup\n2. Try the 'Use a different verification method' option on login screen\n3. Check if you have MFA configured on multiple devices\n4. Contact IT Help Desk immediately to reset MFA (identity verification required)\n5. Provide employee ID and answer security questions\n6. IT will send a temporary bypass code to your registered email\n7. Log in and reconfigure MFA with new device\n8. Generate and save new backup codes\n9. Consider registering multiple devices to prevent lockout",
-    "category": "authentication"
-  },
-  {
-    "id": "kb-012",
-    "title": "USB Device Not Recognized",
-    "keywords": ["usb", "not recognized", "flash drive", "external drive", "device not detected"],
-    "solution": "1. Try plugging the USB device into a different port\n2. Check if the device works on another computer\n3. Look for the device in Disk Management (right-click Start > Disk Management)\n4. If device appears but no drive letter, right-click and assign a letter\n5. Update USB drivers: Device Manager > Universal Serial Bus controllers\n6. Uninstall and reinstall the device: Device Manager > right-click device\n7. Check if USB port is disabled in BIOS settings\n8. Try a different USB cable if possible\n9. Scan the device for errors when connected\n10. Ensure USB devices are allowed by company security policy",
-    "category": "hardware"
-  },
-  {
-    "id": "kb-013",
-    "title": "Screen Sharing Not Working in Teams",
-    "keywords": ["teams", "screen share", "share screen", "presentation", "can't share", "screen sharing"],
-    "solution": "1. Check Teams permissions: Settings > Privacy > Screen Recording\n2. Close the program you're trying to share and reopen it\n3. Share entire screen instead of specific window\n4. Restart Teams application\n5. Ensure Teams is up to date: Click profile > Check for updates\n6. Check if another application has screen sharing active\n7. Disable hardware acceleration: Settings > General > Disable GPU\n8. Try sharing via browser version of Teams\n9. Check firewall settings aren't blocking screen sharing\n10. Restart your computer if issue persists",
-    "category": "communication"
-  },
-  {
-    "id": "kb-014",
-    "title": "Excel File Locked for Editing",
-    "keywords": ["excel", "locked", "read only", "can't edit", "file in use", "locked by another user"],
-    "solution": "1. Check if file is actually open by another user (message shows username)\n2. Contact the user and ask them to close the file\n3. If user is not actively using it, they may have left it open\n4. Try opening in Excel Online (SharePoint/OneDrive)\n5. Copy the file to a different location and try opening\n6. Check file properties: Right-click > Properties > uncheck 'Read-only'\n7. Close all Excel instances and try again\n8. Restart your computer\n9. For shared files, administrator can break the lock via SharePoint\n10. Save a copy with a new name if urgent",
-    "category": "software"
-  },
-  {
-    "id": "kb-015",
-    "title": "Laptop Not Charging",
-    "keywords": ["laptop", "not charging", "battery", "power", "plugged in not charging", "charger"],
-    "solution": "1. Check if power adapter LED light is on\n2. Verify power cable is fully plugged into laptop and outlet\n3. Try a different power outlet\n4. Inspect charging cable for damage or fraying\n5. Clean the laptop charging port with compressed air\n6. Remove battery (if removable) and reconnect power adapter\n7. Hold power button for 30 seconds, then try charging again\n8. Check battery health: Windows > Battery Report (powercfg /batteryreport)\n9. Update battery drivers: Device Manager > Batteries\n10. If battery health is poor (<40%), request replacement via IT ticket",
-    "category": "hardware"
-  },
-  {
-    "id": "kb-016",
-    "title": "Cannot Access Company Portal",
-    "keywords": ["portal", "intranet", "company website", "can't access", "page not loading", "timeout"],
-    "solution": "1. Verify you're connected to VPN if accessing remotely\n2. Try accessing from a different browser\n3. Clear browser cache and cookies\n4. Try incognito/private browsing mode\n5. Check if the URL is correct (bookmark may be outdated)\n6. Disable browser extensions that might block content\n7. Flush DNS cache: Command Prompt > ipconfig /flushdns\n8. Check company status page for system outages\n9. Try from a different network (mobile hotspot)\n10. Contact IT if error message appears",
-    "category": "network"
-  },
-  {
-    "id": "kb-017",
-    "title": "Keyboard Keys Not Working",
-    "keywords": ["keyboard", "keys", "not working", "typing", "stuck keys", "key not responding"],
-    "solution": "1. Check if keyboard is properly connected (wireless: check batteries)\n2. Try keyboard on another computer to isolate issue\n3. Restart your computer\n4. Check if Num Lock/Caps Lock is affecting key behavior\n5. Try on-screen keyboard: Start > Windows Ease of Access\n6. Update keyboard drivers: Device Manager > Keyboards\n7. Clean keyboard: turn upside down and gently tap, use compressed air\n8. Check for liquid damage (especially if recent spill)\n9. Disable Filter Keys: Settings > Ease of Access > Keyboard\n10. Request replacement keyboard via IT ticket if hardware issue",
-    "category": "hardware"
-  },
-  {
-    "id": "kb-018",
-    "title": "OneDrive Not Syncing Files",
-    "keywords": ["onedrive", "sync", "not syncing", "cloud", "files not uploading", "sync pending"],
-    "solution": "1. Check OneDrive icon in system tray for sync status\n2. Ensure you have internet connectivity\n3. Check OneDrive storage space isn't full\n4. Pause and resume sync: Right-click OneDrive > Pause syncing > Resume\n5. Verify file name doesn't contain invalid characters (< > : \" | ? *)\n6. File path length shouldn't exceed 400 characters\n7. Check if file is open in another application\n8. Restart OneDrive: Right-click icon > Quit > Restart from Start menu\n9. Reset OneDrive: Settings > Apps > OneDrive > Reset\n10. Unlink and relink your account: Settings > Account > Unlink this PC",
-    "category": "software"
-  },
-  {
-    "id": "kb-019",
-    "title": "Monitor Display Issues",
-    "keywords": ["monitor", "display", "screen", "no display", "black screen", "flickering", "resolution"],
-    "solution": "1. Check if monitor is powered on (look for LED indicator)\n2. Verify video cable is securely connected (both monitor and computer)\n3. Try a different video cable if available\n4. Connect monitor to a different port on computer (if multiple available)\n5. Adjust display settings: Right-click desktop > Display Settings\n6. Update graphics drivers: Device Manager > Display Adapters\n7. Try different resolution: Display Settings > Resolution\n8. Check monitor input source is correct (HDMI, DisplayPort, etc.)\n9. Test monitor with another computer to isolate issue\n10. Adjust refresh rate: Display Settings > Advanced > Monitor",
-    "category": "hardware"
-  },
-  {
-    "id": "kb-020",
-    "title": "Microsoft Teams Not Loading",
-    "keywords": ["teams", "not loading", "not opening", "stuck", "loading", "blank screen", "crashes"],
-    "solution": "1. Close Teams completely: Right-click system tray icon > Quit\n2. Restart Teams from Start menu\n3. Clear Teams cache: %appdata%\\Microsoft\\Teams > Delete 'Cache' folder\n4. Update Teams: Click profile picture > Check for updates\n5. Try Teams in web browser: teams.microsoft.com\n6. Restart your computer\n7. Temporarily disable firewall/antivirus and test\n8. Reinstall Teams: Control Panel > Uninstall > Download fresh installer\n9. Check system requirements (Windows 10+, 4GB RAM minimum)\n10. Sign in to Teams with your full email address (username@company.com)",
-    "category": "communication"
-  }
+    {
+        "id": 101,
+        "category": "Hardware",
+        "issue": "Printer not responding or printing",
+        "keywords": [
+            "printer",
+            "print",
+            "paper",
+            "jam",
+            "offline"
+        ],
+        "solution": "1. Check if the printer is turned on and connected to the network.\n2. Restart the printer.\n3. Clear the print queue on your computer.\n4. Check for paper jams."
+    },
+    {
+        "id": 102,
+        "category": "Access",
+        "issue": "VPN Connection Failed",
+        "keywords": [
+            "vpn",
+            "connection",
+            "network",
+            "remote",
+            "access"
+        ],
+        "solution": "1. Ensure you have an active internet connection.\n2. Verify your MFA token is correct.\n3. Try switching the VPN protocol in settings to TCP.\n4. Reinstall the VPN client if the issue persists."
+    },
+    {
+        "id": 103,
+        "category": "Software",
+        "issue": "Application crashing on startup",
+        "keywords": [
+            "crash",
+            "app",
+            "software",
+            "freeze",
+            "close"
+        ],
+        "solution": "1. Check for software updates.\n2. Clear the application cache/temporary files.\n3. Restart your computer.\n4. If critical, request a reinstall via ticket."
+    },
+    {
+        "id": 104,
+        "category": "Security",
+        "issue": "Password Reset Instructions",
+        "keywords": [
+            "password",
+            "reset",
+            "login",
+            "forgot",
+            "account"
+        ],
+        "solution": "1. Go to the self-service portal at portal.company.com.\n2. Click 'Forgot Password'.\n3. Enter your employee ID.\n4. Follow the SMS verification steps."
+    },
+    {
+        "id": 105,
+        "category": "Email",
+        "issue": "Outlook not syncing",
+        "keywords": [
+            "email",
+            "outlook",
+            "sync",
+            "receiving",
+            "sending"
+        ],
+        "solution": "1. Check internet connection.\n2. Look for the 'Working Offline' toggle in the Send/Receive tab and turn it off.\n3. Close and reopen Outlook."
+    }
 ]
