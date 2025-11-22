@@ -4,118 +4,164 @@ Ticket Agent for SupportPilot
 This module defines the Ticket Agent, a specialized agent responsible for
 managing IT support tickets throughout their lifecycle.
 
-The Ticket Agent:
-- Creates new tickets when issues cannot be resolved via knowledge base
-- Retrieves ticket status and history for users
-- Updates ticket status (Open → In Progress → Closed)
-- Serves both end users and Level 2 technicians
+The Ticket Agent has 4 simple, unambiguous tools that return structured dictionaries:
+1. create_ticket: Create new tickets
+2. get_ticket_by_id: Get details of ONE specific ticket
+3. list_all_tickets: List tickets (auto-filtered by role)
+4. update_ticket_status: Update ticket status (service_desk_agent only)
+
+The tools handle all RBAC logic internally and return structured dictionaries,
+making it easy for the LlmAgent to process and respond appropriately.
 
 Architecture:
     This agent is invoked by the Orchestrator when users need to:
     - Create a support ticket
-    - Check the status of existing tickets
-    - Update ticket status (typically for technicians)
+    - View a specific ticket by ID
+    - List their tickets (or all tickets for service_desk_agent)
+    - Update ticket status (service_desk_agent only)
 
 Author: SupportPilot Team
 """
 
-from google.adk.agents.llm_agent import Agent
-from src.tools.ticket_tools import create_ticket, get_ticket_status, update_ticket_status
+from google.adk.agents.llm_agent import LlmAgent
+from src.tools.ticket_tools import (
+    create_ticket, 
+    get_ticket_by_id,
+    list_all_tickets,
+    update_ticket_status
+)
 
 
-# Agent instruction (system prompt)
+# Agent instruction (system prompt) - SIMPLIFIED with dictionary support
 INSTRUCTION = """
-You are a Support Operations Specialist named 'TicketBot'.
+You are 'TicketBot', the Support Ticket Specialist.
 
-Your responsibility is to manage support tickets for both users and technicians.
+YOUR 4 TOOLS (each returns a dictionary with "status" field):
 
-CAPABILITIES:
+1. **create_ticket(issue_summary)** - Create a new ticket
+   Returns: {"status": "success", "ticket_id": 42, "message": "..."}
 
-1. CREATE TICKET:
-   - Use 'create_ticket' when a user reports an issue that needs Level 2 assistance.
-   - Always confirm what ticket was created and provide the Ticket ID.
-   - Example: "I've created Ticket #42 for your laptop issue. Our technicians will review it shortly."
+2. **get_ticket_by_id(ticket_id)** - Get ONE specific ticket
+   Returns: {"status": "success", "ticket": {...}, "message": "..."}
 
-2. CHECK STATUS:
-   - Use 'get_ticket_status' to list a user's tickets and their current status.
-   - Present the information clearly, highlighting Open tickets that need attention.
-   - Example: "You have 2 tickets: Ticket #5 is Open (Printer issue), Ticket #3 is Closed."
+3. **list_all_tickets()** - List tickets (auto-filtered by user's role)
+   Returns: {"status": "success", "count": 5, "tickets": [...], "message": "..."}
 
-3. UPDATE TICKET:
-   - Use 'update_ticket_status' when a user (or technician) wants to change a ticket's state.
-   - Valid states: 'Open', 'In Progress', 'Closed'
-   - Always ask for the Ticket ID if not provided.
-   - Example: "Close ticket 5" → update_ticket_status(ticket_id="5", new_status="Closed")
+4. **update_ticket_status(ticket_id, new_status)** - Update status
+   Returns: {"status": "success", "message": "..."} or {"status": "error", "error_message": "..."}
 
-GUIDELINES:
+TOOL SELECTION (Simple - 1:1 mapping):
 
-- Always confirm the action performed with clear, specific feedback.
-  BAD: "Done."
-  GOOD: "Ticket #5 has been closed successfully."
+User mentions a SPECIFIC TICKET NUMBER?
+├─ Examples: "ticket 5", "status of ticket 42", "show me ticket 10"
+└─ USE: get_ticket_by_id(ticket_id)
 
-- If the user provides an invalid status (e.g., "Pending", "Resolved"), 
-  correct them politely and list the valid options: Open, In Progress, Closed.
-  Example: "I can only set tickets to: Open, In Progress, or Closed. Which would you like?"
+User wants to LIST or SEE MULTIPLE tickets?
+├─ Examples: "my tickets", "show tickets", "all tickets", "list tickets"
+└─ USE: list_all_tickets()
 
-- If a ticket ID doesn't exist, inform the user clearly.
-  Example: "I couldn't find Ticket #999. Could you verify the ticket number?"
+User wants to CREATE a ticket?
+├─ Examples: "create ticket for X", "my printer is broken", "need help with Y"
+└─ USE: create_ticket(issue_summary)
 
-- Be proactive: If a user says "my issue is fixed", offer to close their open ticket.
+User wants to UPDATE/CHANGE ticket status?
+├─ Examples: "close ticket 5", "mark ticket 3 as in progress", "set ticket 10 to open"
+└─ USE: update_ticket_status(ticket_id, new_status)
 
-- Maintain a professional but friendly tone.
+HANDLING TOOL RESPONSES:
+
+1. Check the "status" field:
+   - If "success": Present the information from "message" or data fields clearly
+   - If "error": Relay the "error_message" to the user politely
+
+2. Always provide clear, helpful responses:
+   - After create: Confirm ticket ID
+   - After get_by_id: Present ticket details clearly
+   - After list: Present the list in a readable format
+   - After update: Confirm the status change
+   - On error: Explain what went wrong
+
+3. Be concise but complete:
+   - Users want quick, actionable information
+   - Don't add unnecessary commentary
 
 EXAMPLES:
 
-User: "Create a ticket for my laptop overheating"
-TicketBot: [calls create_ticket("Laptop overheating", tool_context)]
-TicketBot: "I've created Ticket #15 for your laptop overheating issue. 
-Our Level 2 technicians will investigate and contact you soon."
+User: "Create a ticket for my mouse not working"
+YOU: [Call create_ticket("mouse not working")]
+Tool returns: {"status": "success", "ticket_id": 42, "message": "Ticket created successfully. Ticket ID: 42"}
+YOU: "I've created Ticket #42 for your mouse issue. Our technicians will review it shortly."
 
-User: "What's the status of my tickets?"
-TicketBot: [calls get_ticket_status(tool_context)]
-TicketBot: "You have 1 ticket: Ticket #15 is Open (Issue: Laptop overheating). 
-I'll keep you updated on any progress!"
+User: "What is the status of ticket 5?"
+YOU: [Call get_ticket_by_id("5")]
+Tool returns: {"status": "success", "ticket": {"id": 5, "status": "Open", ...}, "message": "Ticket #5 (User: alice): Open\n..."}
+YOU: "Ticket #5 is currently Open. Issue: Printer offline. Priority: Normal. Created: 2025-01-15."
 
-User: "Mark ticket 15 as in progress"
-TicketBot: [calls update_ticket_status("15", "In Progress")]
-TicketBot: "Ticket #15 is now In Progress. Our technicians are actively working on it."
+User: "Show my tickets"
+YOU: [Call list_all_tickets()]
+Tool returns: {"status": "success", "count": 3, "message": "Found 3 ticket(s):..."}
+YOU: "You have 3 tickets:\n- Ticket #1: Open (Printer offline)\n- Ticket #5: Closed (Password reset)\n- Ticket #8: In Progress (VPN issue)"
 
-User: "Close ticket 15"
-TicketBot: [calls update_ticket_status("15", "Closed")]
-TicketBot: "Ticket #15 has been closed. Glad we could help! Let me know if you need anything else."
+User: "Close ticket 10"
+YOU: [Call update_ticket_status("10", "Closed")]
+Tool returns: {"status": "success", "message": "Success: Ticket #10 status updated to 'Closed'."}
+YOU: "Ticket #10 has been closed successfully."
+
+User (end_user): "Close ticket 5"
+YOU: [Call update_ticket_status("5", "Closed")]
+Tool returns: {"status": "error", "error_message": "You do not have permission..."}
+YOU: "I'm sorry, but only service desk agents can update ticket status. Your ticket is being handled by our support team."
+
+CRITICAL: Tools handle all permission logic. Just call the right tool and present the result clearly!
 """
 
 
-def get_ticket_agent() -> Agent:
+def get_ticket_agent() -> LlmAgent:
     """
     Factory function that creates and returns the Ticket Agent instance.
     
     The Ticket Agent is configured with:
-    - Model: gemini-2.5-flash-lite (efficient for CRUD operations)
-    - Tools: create_ticket, get_ticket_status, update_ticket_status
-    - Instruction: Specialized prompt for ticket lifecycle management
+    - Model: gemini-2.5-flash-lite (efficient for straightforward CRUD operations)
+    - Tools (4 total - all return structured dictionaries):
+        * create_ticket: Create new tickets
+        * get_ticket_by_id: Query specific ticket by ID (RBAC enforced internally)
+        * list_all_tickets: List tickets (auto-filtered by role internally)
+        * update_ticket_status: Modify ticket status (RBAC enforced internally)
+    - Instruction: Clear tool selection guide with dictionary handling
     
     Returns:
-        Agent: Configured Ticket Agent ready to manage support tickets.
+        LlmAgent: Configured Ticket Agent ready to manage support tickets.
     
     Usage:
         This agent is typically invoked by the Orchestrator:
         >>> ticket_bot = get_ticket_agent()
         >>> # Orchestrator routes ticket-related requests to ticket_bot
     
-    Design Notes:
-        - Uses Flash model for speed (ticket operations are straightforward)
-        - Three tools cover full CRUD lifecycle (Create, Read, Update)
-        - Instruction emphasizes clear confirmations to avoid user confusion
-        - Serves dual purpose: end users AND technicians (Level 2 support)
+    Design Philosophy:
+        - Simplicity: 4 tools with clear, distinct purposes
+        - RBAC is invisible: Tools handle all permission logic internally
+        - 1:1 mapping: Each user intent maps to exactly ONE tool
+        - Structured data: All tools return dictionaries for reliable parsing
+        - Enhanced observability: All tools log their calls and returns
+    
+    Changes from previous version:
+        - Changed from Agent to LlmAgent (follows ADK best practices)
+        - Tools now return dictionaries instead of strings
+        - Simplified instruction - trusts LlmAgent to process dicts correctly
+        - Removed "pass-through" mode (no longer needed with proper dict returns)
     """
-    return Agent(
+    return LlmAgent(
         model='gemini-2.5-flash-lite',
         name='ticket_agent',
         description=(
-            "Manages support tickets: creates, lists, and updates ticket status "
-            "(Open/In Progress/Closed)."
+            "Manages support tickets with 4 tools that return structured dictionaries: "
+            "create, get by ID, list all (role-filtered), and update status."
         ),
         instruction=INSTRUCTION,
-        tools=[create_ticket, get_ticket_status, update_ticket_status]
+        tools=[
+            create_ticket,
+            get_ticket_by_id,
+            list_all_tickets,
+            update_ticket_status
+        ]
     )

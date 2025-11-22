@@ -20,9 +20,15 @@ import json
 import os
 from typing import List, Dict, Any
 
+# Import logger for enhanced observability
+from src.utils.logger import setup_logger
+
 # Define absolute paths to ensure stability regardless of execution context
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 KB_PATH = os.path.join(BASE_DIR, 'data', 'knowledge_base.json')
+
+# Initialize logger for this module
+logger = setup_logger("KBTools")
 
 
 def load_kb() -> List[Dict[str, Any]]:
@@ -56,7 +62,7 @@ def load_kb() -> List[Dict[str, Any]]:
         return []
 
 
-def search_knowledge_base(query: str) -> str:
+def search_knowledge_base(query: str) -> dict:
     """
     Searches the knowledge base for solutions based on a user query.
     
@@ -75,19 +81,42 @@ def search_knowledge_base(query: str) -> str:
                      (e.g., "printer offline", "vpn connection failed").
     
     Returns:
-        str: A formatted string containing matching issue(s) and solution(s).
-             Returns "KB_NOT_FOUND" if no matches are found.
-             
-             Format:
-             ISSUE: <problem description>
-             SOLUTION: <step-by-step instructions>
+        dict: Structured response with search results or not found status.
+        
+        Success format (results found):
+        {
+            "status": "success",
+            "count": 2,
+            "results": [
+                {
+                    "id": 101,
+                    "issue": "Printer not responding",
+                    "solution": "1. Check if...",
+                    "category": "Hardware"
+                },
+                ...
+            ],
+            "message": "ISSUE: Printer not responding\nSOLUTION: 1. Check if..."
+        }
+        
+        Not found format:
+        {
+            "status": "not_found",
+            "count": 0,
+            "results": [],
+            "message": "No solutions found in the knowledge base for your query."
+        }
     
     Example:
         >>> result = search_knowledge_base("my printer is not working")
-        >>> print(result)
-        ISSUE: Printer not responding or printing
-        SOLUTION: 1. Check if the printer is turned on...
+        >>> print(result["status"])
+        "success"
+        >>> print(result["message"])
+        "ISSUE: Printer not responding or printing\nSOLUTION: 1. Check if the printer is turned on..."
     """
+    # Enhanced logging: Log function entry
+    logger.info(f"[TOOL_CALL] search_knowledge_base | Query: {query[:50]}...")
+    
     # Load the knowledge base
     kb_data = load_kb()
     
@@ -108,15 +137,48 @@ def search_knowledge_base(query: str) -> str:
         
         # If either match succeeds, add to results
         if keywords_match or issue_match:
-            formatted_result = (
-                f"ISSUE: {entry['issue']}\n"
-                f"SOLUTION: {entry['solution']}"
-            )
-            results.append(formatted_result)
+            result_entry = {
+                "id": entry.get('id'),
+                "issue": entry.get('issue'),
+                "solution": entry.get('solution'),
+                "category": entry.get('category')
+            }
+            results.append(result_entry)
     
     # Return appropriate response
     if not results:
-        return "KB_NOT_FOUND"
+        result = {
+            "status": "not_found",
+            "count": 0,
+            "results": [],
+            "message": "No solutions found in the knowledge base for your query. You may need to create a support ticket for further assistance."
+        }
+        logger.info(f"[TOOL_RETURN] search_knowledge_base | No results found for query")
+        return result
     
     # Return the top 2 results to avoid overwhelming the agent's context window
-    return "\n\n".join(results[:2])
+    top_results = results[:2]
+    
+    # Format message for display
+    message_parts = []
+    for entry in top_results:
+        formatted_result = (
+            f"ISSUE: {entry['issue']}\n"
+            f"SOLUTION: {entry['solution']}"
+        )
+        message_parts.append(formatted_result)
+    
+    result = {
+        "status": "success",
+        "count": len(top_results),
+        "results": top_results,
+        "message": "\n\n".join(message_parts)
+    }
+    
+    # Enhanced logging: Log function exit
+    logger.info(
+        f"[TOOL_RETURN] search_knowledge_base | "
+        f"Success: Found {len(top_results)} result(s)"
+    )
+    
+    return result
