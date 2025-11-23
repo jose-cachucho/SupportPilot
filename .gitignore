@@ -1,8 +1,17 @@
- Python
+# ============================================================================
+# SupportPilot - Git Ignore Configuration
+# ============================================================================
+
+# --- Python ---
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# C extensions
 *.so
+
+# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -16,49 +25,109 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # Virtual Environment
+.venv/
 venv/
-env/
 ENV/
-.venv
+env/
+.virtualenv/
 
-# Environment variables
-.env
-.env.local
+# PyInstaller
+*.manifest
+*.spec
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
 
-# IDE
+# --- IDEs and Editors ---
+# VSCode
 .vscode/
+*.code-workspace
+
+# PyCharm
 .idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-logs/
+*.iml
+*.ipr
+*.iws
 
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# pytest
-.pytest_cache/
-.coverage
-htmlcov/
+# --- Environment Variables ---
+# CRITICAL: Never commit API keys!
+.env
+.env.local
+.env.*.local
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+# --- Project Specific ---
+# Database files (contains session data and tickets)
+data/sessions.db
+data/tickets.db
+data/sessions.db-journal
+data/tickets.db-journal
+
+# Keep knowledge_base.json (it's seed data)
+# !data/knowledge_base.json
+
+# Log files
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# --- Operating System ---
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+.Trash-*
+
+# --- Docker (if used) ---
+*.dockerignore
+docker-compose.override.yml
+
+# --- Backup files ---
+*.bak
+*.backup
+*.old
+
+# ============================================================================
+# Keep These Files (Examples):
+# - data/knowledge_base.json (seed data)
+# - README.md
+# - requirements.txt
+# - setup_data.py
+# - main.py
+# ============================================================================

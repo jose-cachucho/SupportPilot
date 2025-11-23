@@ -13,21 +13,26 @@
 
 # --- Core Framework ---
 # Google Agent Development Kit (ADK) - Multi-agent orchestration framework
-google-adk
+# Version: Latest compatible with the Kaggle course (Dec 2024)
+google-adk>=0.1.0
 
 # --- Environment & Configuration ---
 # Load environment variables from .env file (for GOOGLE_API_KEY)
-python-dotenv
+python-dotenv>=1.0.0
 
 # --- Terminal Output Styling ---
 # Colorama: Cross-platform colored terminal text (Windows/Linux/Mac)
-colorama
+colorama>=0.4.6
 
 # Termcolor: ANSI color formatting for terminal output
-termcolor
+termcolor>=2.3.0
 
 # ============================================================================
-# Notes:
-# - Ensure GOOGLE_API_KEY is set in your .env file
-# - Python 3.9+ recommended for ADK compatibility
+# System Requirements:
+# - Python 3.9+ (Python 3.10+ recommended)
+# - GOOGLE_API_KEY environment variable (get from https://aistudio.google.com/apikey)
+# 
+# Tested with:
+# - Python 3.10.12
+# - Ubuntu 22.04 / macOS / Windows 10+
 # ============================================================================
