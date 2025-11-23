@@ -140,7 +140,6 @@ SupportPilot: [calls ticket_agent]
 SupportPilot: [relays ticket_agent response - ticket_agent knows user is service_desk_agent]
 """
 
-
 def get_orchestrator_agent() -> LlmAgent:
     """
     Factory function that creates and returns the Orchestrator Agent instance.
@@ -187,7 +186,7 @@ def get_orchestrator_agent() -> LlmAgent:
     
     # Create and return the orchestrator with sub-agents wrapped as AgentTools
     return LlmAgent(
-        model='gemini-2.5-flash-lite',
+        model='gemini-2.5-flash-lite', 
         name='support_pilot_orchestrator',
         description="Main coordinator. Routes requests and manages user identity.",
         instruction=ORCHESTRATOR_INSTRUCTION,

@@ -115,7 +115,6 @@ YOU: "I'm sorry, but only service desk agents can update ticket status. Your tic
 CRITICAL: Tools handle all permission logic. Just call the right tool and present the result clearly!
 """
 
-
 def get_ticket_agent() -> LlmAgent:
     """
     Factory function that creates and returns the Ticket Agent instance.
@@ -151,7 +150,7 @@ def get_ticket_agent() -> LlmAgent:
         - Removed "pass-through" mode (no longer needed with proper dict returns)
     """
     return LlmAgent(
-        model='gemini-2.5-flash-lite',
+        model='gemini-2.5-flash-lite', 
         name='ticket_agent',
         description=(
             "Manages support tickets with 4 tools that return structured dictionaries: "

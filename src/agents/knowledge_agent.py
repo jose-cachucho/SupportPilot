@@ -97,8 +97,6 @@ YOU: "I don't have information about that in my knowledge base. Would you like m
 
 REMEMBER: Always check the "status" field first, then use the "message" field to respond!
 """
-
-
 def get_knowledge_agent() -> LlmAgent:
     """
     Factory function that creates and returns the Knowledge Agent instance.
@@ -123,7 +121,7 @@ def get_knowledge_agent() -> LlmAgent:
         - Tool returns structured dictionaries for reliable parsing
     """
     return LlmAgent(
-        model='gemini-2.5-flash-lite',
+        model='gemini-2.5-flash-lite', 
         name='knowledge_agent',
         description=(
             "Searches the Knowledge Base to solve technical issues "

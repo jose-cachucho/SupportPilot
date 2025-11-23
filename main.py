@@ -300,6 +300,7 @@ async def main_loop():
             # Visual feedback (processing indicator)
             print("🤖 SupportPilot ", end="", flush=True)
             full_text = ""  # Accumulate agent response text
+            has_printed_newline = False  # Track if we've printed a newline after dots
             
             # === STEP 6: EXECUTE AGENT ===
             async for event in runner.run_async(
@@ -323,35 +324,26 @@ async def main_loop():
                     
                     # Event Type 2: Tool Response (Tool returning data to agent)
                     elif part.function_response:
-                        # Log tool output (captured for observability)
+                        # Log tool output (for observability only - DO NOT PRINT)
                         response_data = part.function_response.response
                         
-                        # If the response is a dict with 'result', extract and print it
-                        if isinstance(response_data, dict) and 'result' in response_data:
-                            result_text = response_data['result']
-                            if result_text and result_text.strip():
-                                # Print the result from nested agent
-                                if not full_text:
-                                    print()  # New line after dots
-                                print(result_text)
-                                full_text += result_text
-                                logger.info(f"AGENT_RESPONSE (from tool result): {result_text[:100]}...")
-                        
-                        # Standard log
                         logger.info(
                             f"TOOL_OUTPUT: {part.function_response.name} | "
                             f"Response: {str(response_data)[:100]}..."
                         )
                     
-                    # Event Type 3: Text Response (Agent speaking to user)
+                    # Event Type 3: Text Response (Agent's final/intermediate response)
                     elif part.text:
                         text_clean = part.text.strip()
                         
-                        # Ignore empty responses but NOT "None" string
+                        # Only process non-empty, meaningful text
                         if text_clean and text_clean.lower() != "none":
-                            # Only print newline if we haven't printed text yet
-                            if not full_text:
+                            # Print newline after dots (only once)
+                            if not has_printed_newline:
                                 print()  # New line after the dots
+                                has_printed_newline = True
+                            
+                            # Print the agent's response
                             print(text_clean)
                             full_text += text_clean
                             

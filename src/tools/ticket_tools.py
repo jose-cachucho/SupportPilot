@@ -75,8 +75,7 @@ def create_ticket(
         Success format:
         {
             "status": "success",
-            "ticket_id": 42,
-            "message": "Ticket created successfully. Ticket ID: 42"
+            "ticket_id": 42
         }
         
         Error format:
@@ -90,7 +89,7 @@ def create_ticket(
     
     Example:
         >>> create_ticket("Printer is offline", tool_context)
-        {"status": "success", "ticket_id": 42, "message": "Ticket created successfully. Ticket ID: 42"}
+        {"status": "success", "ticket_id": 42}
     
     Security:
         - User identity comes from authenticated session, not user input
@@ -140,8 +139,7 @@ def create_ticket(
         
         result = {
             "status": "success",
-            "ticket_id": ticket_id,
-            "message": f"Ticket created successfully. Ticket ID: {ticket_id}"
+            "ticket_id": ticket_id
         }
         
         # Enhanced logging: Log function exit with result
@@ -172,8 +170,7 @@ def get_ticket_by_id(ticket_id: str, tool_context: ToolContext) -> dict:
     """
     Retrieves detailed information about a specific ticket by its ID (RBAC enforced).
     
-    Returns a consistent format with ALL ticket attributes, regardless of user role.
-    This ensures the LLM always receives complete information to answer queries.
+    Returns ticket data in a clean structured format for easy agent interpretation.
     
     Access Control:
         - end_user: Can only view tickets they own
@@ -196,8 +193,7 @@ def get_ticket_by_id(ticket_id: str, tool_context: ToolContext) -> dict:
                 "issue": "Printer not responding",
                 "priority": "Normal",
                 "created_at": "2025-01-15 10:30:00"
-            },
-            "message": "Ticket #5 (User: alice_123): Open\nIssue: Printer not responding\nPriority: Normal\nCreated: 2025-01-15 10:30:00"
+            }
         }
         
         Error formats:
@@ -211,20 +207,10 @@ def get_ticket_by_id(ticket_id: str, tool_context: ToolContext) -> dict:
             "error_message": "You do not have permission to view this ticket."
         }
     
-    Example (any role):
-        >>> get_ticket_by_id("5", tool_context)
-        Ticket #5 (User: alice_123): Open
-        Issue: Printer not responding
-        Priority: Normal
-        Created: 2025-01-15 10:30:00
-    
     Security:
         - end_users cannot access tickets belonging to other users
         - service_desk_agents have full visibility for support operations
         - Prevents unauthorized information disclosure
-    
-    Design Note:
-        Always returns user_id in response to avoid LLM confusion about ticket ownership.
     """
     # 1. Resolve user_id and role from session state
     user_id = tool_context.state.get("user:user_id") or tool_context.state.get("user_id")
@@ -283,14 +269,7 @@ def get_ticket_by_id(ticket_id: str, tool_context: ToolContext) -> dict:
             )
             return error_result
         
-        # 5. Format response with structured data
-        message = (
-            f"Ticket #{ticket['id']} (User: {ticket['user_id']}): {ticket['status']}\n"
-            f"Issue: {ticket['issue_summary']}\n"
-            f"Priority: {ticket['priority']}\n"
-            f"Created: {ticket['created_at']}"
-        )
-        
+        # 5. Return clean structured data (NO message field for success)
         result = {
             "status": "success",
             "ticket": {
@@ -300,8 +279,7 @@ def get_ticket_by_id(ticket_id: str, tool_context: ToolContext) -> dict:
                 "issue": ticket['issue_summary'],
                 "priority": ticket['priority'],
                 "created_at": ticket['created_at']
-            },
-            "message": message
+            }
         }
         
         # Enhanced logging: Log function exit with result summary
@@ -354,40 +332,20 @@ def list_all_tickets(tool_context: ToolContext) -> dict:
                     "created_at": "2025-01-15 10:30:00"
                 },
                 ...
-            ],
-            "message": "Found 15 ticket(s):..."
+            ]
         }
         
         No tickets format:
         {
             "status": "success",
             "count": 0,
-            "tickets": [],
-            "message": "No tickets found."
+            "tickets": []
         }
-    
-    Example (end_user):
-        >>> list_all_tickets(tool_context)
-        Found 2 ticket(s):
-        - Ticket #1 (User: alice_123): Open - Normal priority (Issue: Printer offline)
-        - Ticket #5 (User: alice_123): Closed - Low priority (Issue: Password reset)
-    
-    Example (service_desk_agent):
-        >>> list_all_tickets(tool_context)
-        Found 15 ticket(s):
-        - Ticket #1 (User: alice_123): Open - Normal priority (Issue: Printer offline)
-        - Ticket #2 (User: bob_456): In Progress - High priority (Issue: VPN failed)
-        - Ticket #5 (User: alice_123): Closed - Low priority (Issue: Password reset)
-        ...
     
     Security:
         - Automatic data isolation for end_users
         - System-wide visibility for service_desk_agents
         - No explicit permission checking needed (handled by SQL WHERE clause)
-    
-    Design Note:
-        The agent doesn't need to know about role filtering - it's transparent.
-        Just call list_all_tickets() and get the appropriate result.
     """
     # 1. Resolve user_id and role from session state
     user_id = tool_context.state.get("user:user_id") or tool_context.state.get("user_id")
@@ -439,20 +397,8 @@ def list_all_tickets(tool_context: ToolContext) -> dict:
         tickets = cursor.fetchall()
         conn.close()
         
-        # 3. Format response
-        if not tickets:
-            result = {
-                "status": "success",
-                "count": 0,
-                "tickets": [],
-                "message": "No tickets found."
-            }
-            logger.info(f"[TOOL_RETURN] list_all_tickets | {result}")
-            return result
-        
-        # Build ticket list
+        # 3. Format response - clean structured data only
         ticket_list = []
-        message_lines = [f"Found {len(tickets)} ticket(s):"]
         
         for ticket in tickets:
             ticket_dict = {
@@ -464,19 +410,11 @@ def list_all_tickets(tool_context: ToolContext) -> dict:
                 "created_at": ticket['created_at']
             }
             ticket_list.append(ticket_dict)
-            
-            line = (
-                f"- Ticket #{ticket['id']} (User: {ticket['user_id']}): "
-                f"{ticket['status']} - {ticket['priority']} priority "
-                f"(Issue: {ticket['issue_summary']})"
-            )
-            message_lines.append(line)
         
         result = {
             "status": "success",
             "count": len(tickets),
-            "tickets": ticket_list,
-            "message": "\n".join(message_lines)
+            "tickets": ticket_list
         }
         
         # Enhanced logging: Log function exit with result summary
@@ -525,8 +463,7 @@ def update_ticket_status(
         {
             "status": "success",
             "ticket_id": 5,
-            "new_status": "Closed",
-            "message": "Success: Ticket #5 status updated to 'Closed'."
+            "new_status": "Closed"
         }
         
         Permission denied format:
@@ -546,15 +483,6 @@ def update_ticket_status(
         - Status must be one of the three allowed values
         - Ticket ID must exist in the database
         - Case-insensitive status matching for user-friendly input
-    
-    Example (service_desk_agent):
-        >>> update_ticket_status("5", "closed", tool_context)
-        "Success: Ticket #5 status updated to 'Closed'."
-    
-    Example (end_user):
-        >>> update_ticket_status("5", "closed", tool_context)
-        "Error: You do not have permission to update ticket status. 
-         Only service desk agents can modify tickets."
     
     Workflow:
         Open → In Progress → Closed
@@ -632,8 +560,7 @@ def update_ticket_status(
         result = {
             "status": "success",
             "ticket_id": int(ticket_id),
-            "new_status": matched_status,
-            "message": f"Success: Ticket #{ticket_id} status updated to '{matched_status}'."
+            "new_status": matched_status
         }
         
         # Enhanced logging: Log function exit with result
